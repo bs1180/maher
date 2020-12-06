@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, createRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap/dist/gsap";
 import Head from "next/head";
 import mapboxgl from "mapbox-gl";
@@ -7,13 +7,7 @@ import { getArc, wrap } from "../components/data";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
-const origin = {
-  lat: 48.14652,
-  lng: 16.38326,
-};
-
-
-export default function Home({ blocks = [], arc = [], ...props }) {
+export default function Home({ arc = [], ...props }) {
   const mapRef = useRef();
   const mapWrapperRef = useRef();
   const [loading, setLoading] = useState(true);
@@ -149,7 +143,6 @@ export async function getServerSideProps() {
   return {
     props: {
       ...contents,
-      blocks: [],
       origin,
       arc: getArc(origin, dest),
     },

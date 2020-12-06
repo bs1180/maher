@@ -88,7 +88,7 @@ export default function Home({ arc = [], ...props }) {
         </div>
         <div className="z-30 absolute top-0 bg-transparent mx-8 my-24 max-w-md space-y-24">
           {props.topLogo?.url && (
-            <div class="flex justify-center p-4">
+            <div className="flex justify-center p-4">
               <img src={props.topLogo?.url} alt="" />
             </div>
           )}

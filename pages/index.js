@@ -1,15 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap/dist/gsap";
 import Head from "next/head";
 import mapboxgl from "mapbox-gl";
 import { getPage } from "../lib/api";
 import { getArc, wrap } from "../components/data";
+import { MarkerIcon } from "../components/icon";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+
+const STEPS = 499;
 
 export default function Home({ arc = [], ...props }) {
   const mapRef = useRef();
   const mapWrapperRef = useRef();
+  const markerRef = useRef();
+  const customMarkerRef = useRef();
 
   const xRef = useRef({ step: 0 });
 
@@ -17,16 +22,23 @@ export default function Home({ arc = [], ...props }) {
     if (
       xRef.current.step &&
       mapRef.current &&
-      mapRef.current.getSource("route")
+      mapRef.current.getSource("progress")
     ) {
-      const partialArc = arc.slice(0, xRef.current.step);
-      mapRef.current.getSource("route").setData(wrap(partialArc));
+      const animationProgress = (xRef.current.step / STEPS) * 100;
+      const actualProgress = (props.distanceWalked / props.totalRoute) * 100;
+      if (actualProgress > animationProgress) {
+        const partialArc = arc.slice(0, xRef.current.step);
+        mapRef.current.getSource("progress").setData(wrap(partialArc));
+        const [last] = arc.slice(xRef.current.step - 1, xRef.current.step);
+
+        markerRef.current.setLngLat(last);
+      }
     }
   };
 
   useEffect(() => {
     gsap.to(xRef.current, {
-      step: 499,
+      step: STEPS,
       snap: "step",
       scrollTrigger: {
         trigger: mapWrapperRef.current,
@@ -52,21 +64,46 @@ export default function Home({ arc = [], ...props }) {
       });
 
       mapRef.current.on("load", function () {
-        mapRef.current.addSource("route", {
+        mapRef.current.addSource("progress", {
           type: "geojson",
           data: wrap([0, 0]),
         });
 
         mapRef.current.addLayer({
-          id: "route",
-          source: "route",
+          id: "progress",
+          source: "progress",
           type: "line",
           paint: {
-            "line-width": 3,
+            "line-width": 2,
             "line-color": "#000000",
           },
         });
+
+        mapRef.current.addSource("route", {
+          type: "geojson",
+          data: wrap(arc),
+        });
+
+        mapRef.current.addLayer(
+          {
+            id: "route",
+            source: "route",
+            type: "line",
+            paint: {
+              "line-width": 2,
+              "line-color": "gray",
+              "line-opacity": 0.5,
+            },
+          },
+          "progress"
+        );
       });
+
+      markerRef.current = new mapboxgl.Marker(customMarkerRef.current);
+
+      markerRef.current.setLngLat([props.origin.lng, props.origin.lat]);
+
+      markerRef.current.addTo(mapRef.current);
     }
   }, [mapWrapperRef]);
 
@@ -84,7 +121,10 @@ export default function Home({ arc = [], ...props }) {
           ref={mapWrapperRef}
           className="z-20 min-h-screen w-full bg-yellow-400 flex items-center justify-center pointer-events-none"
         >
-          <div>{" "}</div>
+          <div> </div>
+          <div ref={customMarkerRef}>
+            <MarkerIcon className="h-6 w-6" />
+          </div>
         </div>
         <div className="z-30 absolute top-0 bg-transparent mx-8 my-24 max-w-md space-y-24">
           {props.topLogo?.url && (
@@ -95,21 +135,21 @@ export default function Home({ arc = [], ...props }) {
 
           <div
             dangerouslySetInnerHTML={{ __html: props.firstBlock.html }}
-            class="p-8 bg-white opacity-75 prose"
+            className="p-8 bg-white opacity-75 prose"
           />
           <div
             dangerouslySetInnerHTML={{ __html: props.secondBlock.html }}
-            class="p-8 bg-white opacity-75 prose"
+            className="p-8 bg-white opacity-75 prose"
           />
           <div
             id="last"
-            class="p-8 p-8 bg-white opacity-75 prose"
+            className="p-8 p-8 bg-white opacity-75 prose"
             dangerouslySetInnerHTML={{ __html: props.thirdBlock.html }}
           />
         </div>
         <div className="p-4 md:p-32 bg-black">
           <div
-            class="md:max-w-md mx-auto p-4 md:p-6 bg-yellow-50 prose"
+            className="md:max-w-md mx-auto p-4 md:p-6 bg-yellow-50 prose"
             dangerouslySetInnerHTML={{ __html: props.donationBlock.html }}
           />
         </div>
@@ -131,11 +171,14 @@ export async function getServerSideProps() {
     lng: contents.destinationPointLongitude,
   };
 
+  const { arc, lineDistance: totalRoute } = getArc(origin, dest);
+
   return {
     props: {
       ...contents,
       origin,
-      arc: getArc(origin, dest),
+      arc,
+      totalRoute,
     },
   };
 }

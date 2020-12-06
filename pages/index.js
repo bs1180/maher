@@ -51,7 +51,7 @@ export default function Home({ arc = [], ...props }) {
         zoom: 2,
       });
 
-      mapRef.current.on("load", function () {       
+      mapRef.current.on("load", function () {
         mapRef.current.addSource("route", {
           type: "geojson",
           data: wrap([0, 0]),
@@ -82,9 +82,9 @@ export default function Home({ arc = [], ...props }) {
       <div className="">
         <div
           ref={mapWrapperRef}
-          className="z-20 h-screen w-full bg-red-500 flex items-center justify-center pointer-events-none"
+          className="z-20 h-screen w-full bg-yellow-400 flex items-center justify-center pointer-events-none"
         >
-          <div>map goes here </div>
+          <div>{" "}</div>
         </div>
         <div className="z-30 absolute top-0 bg-transparent mx-8 my-24 max-w-md space-y-24">
           {props.topLogo?.url && (
@@ -97,7 +97,7 @@ export default function Home({ arc = [], ...props }) {
             dangerouslySetInnerHTML={{ __html: props.firstBlock.html }}
             class="p-8 bg-white opacity-75 prose"
           />
-                    <div
+          <div
             dangerouslySetInnerHTML={{ __html: props.secondBlock.html }}
             class="p-8 bg-white opacity-75 prose"
           />
@@ -109,7 +109,7 @@ export default function Home({ arc = [], ...props }) {
         </div>
         <div className="p-4 md:p-32 bg-black">
           <div
-            class="md:max-w-md mx-auto p-6 bg-yellow-50 prose"
+            class="md:max-w-md mx-auto p-4 md:p-6 bg-yellow-50 prose"
             dangerouslySetInnerHTML={{ __html: props.donationBlock.html }}
           />
         </div>

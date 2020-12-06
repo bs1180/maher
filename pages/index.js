@@ -10,7 +10,6 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 export default function Home({ arc = [], ...props }) {
   const mapRef = useRef();
   const mapWrapperRef = useRef();
-  const [loading, setLoading] = useState(true);
 
   const xRef = useRef({ step: 0 });
 
@@ -52,8 +51,7 @@ export default function Home({ arc = [], ...props }) {
         zoom: 2,
       });
 
-      mapRef.current.on("load", function () {
-        setLoading(false);
+      mapRef.current.on("load", function () {       
         mapRef.current.addSource("route", {
           type: "geojson",
           data: wrap([0, 0]),
@@ -81,13 +79,6 @@ export default function Home({ arc = [], ...props }) {
           rel="stylesheet"
         />
       </Head>
-      <div
-        className={`bg-white flex items-center justify-center inset-0 absolute z-50 text-gray-800 ${
-          loading ? "absolute" : "hidden"
-        }`}
-      >
-        loading...
-      </div>
       <div className="">
         <div
           ref={mapWrapperRef}
@@ -116,9 +107,9 @@ export default function Home({ arc = [], ...props }) {
             dangerouslySetInnerHTML={{ __html: props.thirdBlock.html }}
           />
         </div>
-        <div className="p-32 bg-black">
+        <div className="p-4 md:p-32 bg-black">
           <div
-            class="max-w-md mx-auto p-6 bg-yellow-50 prose"
+            class="md:max-w-md mx-auto p-6 bg-yellow-50 prose"
             dangerouslySetInnerHTML={{ __html: props.donationBlock.html }}
           />
         </div>

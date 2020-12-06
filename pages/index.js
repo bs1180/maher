@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState, createRef } from "react";
 import { gsap } from "gsap/dist/gsap";
 import Head from "next/head";
-import { useWindowScroll } from "react-use";
-import { useWindowSize } from "react-use";
 import mapboxgl from "mapbox-gl";
-import { QuoteBlock, TextBlock } from "../components/blocks";
 import { getPage } from "../lib/api";
-
-import { createBoxes, createLine, getArc, wrap } from "../components/data";
+import { getArc, wrap } from "../components/data";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
@@ -16,26 +12,11 @@ const origin = {
   lng: 16.38326,
 };
 
-const dest = {
-  lng: 76.21989,
-  lat: 24.42479,
-};
 
 export default function Home({ blocks = [], arc = [], ...props }) {
   const mapRef = useRef();
   const mapWrapperRef = useRef();
-  const [blockRefs, setBlockRefs] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const blockLength = blocks.length;
-
-  useEffect(() => {
-    setBlockRefs((elRefs) =>
-      Array(blockLength)
-        .fill()
-        .map((_, i) => blockRefs[i] || createRef())
-    );
-  }, [blockLength]);
 
   const xRef = useRef({ step: 0 });
 
@@ -71,7 +52,7 @@ export default function Home({ blocks = [], arc = [], ...props }) {
       mapRef.current = new mapboxgl.Map({
         container: mapWrapperRef.current,
         style: "mapbox://styles/benedictsmith/ckidiozas0sct19quummf8gmd",
-        center: [origin.lng, origin.lat],
+        center: [props.origin.lng, props.origin.lat],
         draggable: false,
         scrollZoom: false,
         zoom: 2,
@@ -107,7 +88,7 @@ export default function Home({ blocks = [], arc = [], ...props }) {
         />
       </Head>
       <div
-        className={`bg-black inset-0 absolute z-50 text-white ${
+        className={`bg-white flex items-center justify-center inset-0 absolute z-50 text-gray-800 ${
           loading ? "absolute" : "hidden"
         }`}
       >
@@ -154,7 +135,6 @@ export default function Home({ blocks = [], arc = [], ...props }) {
 
 export async function getServerSideProps() {
   const contents = await getPage("homepage");
-  console.log(contents);
 
   const origin = {
     lat: contents.originPointLatitude,
@@ -170,6 +150,7 @@ export async function getServerSideProps() {
     props: {
       ...contents,
       blocks: [],
+      origin,
       arc: getArc(origin, dest),
     },
   };

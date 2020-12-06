@@ -41,7 +41,7 @@ export default function Home({ arc = [], ...props }) {
   }, [mapWrapperRef]);
 
   useEffect(() => {
-    if (false || mapWrapperRef.current) {
+    if (mapWrapperRef.current) {
       mapRef.current = new mapboxgl.Map({
         container: mapWrapperRef.current,
         style: "mapbox://styles/benedictsmith/ckidiozas0sct19quummf8gmd",
@@ -82,7 +82,7 @@ export default function Home({ arc = [], ...props }) {
       <div className="">
         <div
           ref={mapWrapperRef}
-          className="z-20 h-screen w-full bg-yellow-400 flex items-center justify-center pointer-events-none"
+          className="z-20 min-h-screen w-full bg-yellow-400 flex items-center justify-center pointer-events-none"
         >
           <div>{" "}</div>
         </div>
